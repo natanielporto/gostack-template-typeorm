@@ -11,6 +11,7 @@ export class CreateTransaction1605238989208 implements MigrationInterface {
             type: 'uuid',
             generationStrategy: 'uuid',
             default: 'uuid_generate_v4()',
+            isPrimary: true,
           },
           {
             name: 'title',
@@ -18,7 +19,13 @@ export class CreateTransaction1605238989208 implements MigrationInterface {
           },
           {
             name: 'value',
-            type: 'float',
+            type: 'decimal',
+            scale: 2,
+            precision: 10,
+          },
+          {
+            name: 'type',
+            type: 'varchar',
           },
           {
             name: 'category_id',
@@ -34,6 +41,16 @@ export class CreateTransaction1605238989208 implements MigrationInterface {
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+          },
+        ],
+        foreignKeys: [
+          {
+            name: 'TransactionCategory',
+            columnNames: ['category_id'],
+            referencedColumnNames: ['id'],
+            referencedTableName: 'categories',
+            onDelete: 'SET NULL',
+            onUpdate: 'CASCADE',
           },
         ],
       }),
