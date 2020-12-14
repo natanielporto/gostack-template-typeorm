@@ -1,10 +1,9 @@
+import { getCustomRepository, getRepository } from 'typeorm';
 import AppError from '../errors/AppError';
-import { getRepository, getCustomRepository } from 'typeorm';
-
-import Transaction from '../models/Transaction';
 import Category from '../models/Category';
-
+import Transaction from '../models/Transaction';
 import TransactionRepository from '../repositories/TransactionsRepository';
+
 
 interface TransactionDTO {
   title: string;
@@ -25,15 +24,16 @@ class CreateTransactionService {
 
     const balance = await transactionRepository.getBalance();
 
-    if (balance.total - value < 0 && type === 'outcome') {
+    if (type === 'outcome' && balance.total - value < 0.0) {
       throw new AppError('Insuficient funds.');
     }
 
-    const checkCategory = categoryRepository.findOne({
+    let category_id = '';
+    
+    const checkCategory = await categoryRepository.findOne({
       where: { title: category },
     });
 
-    let category_id = '';
 
     if (!checkCategory) {
       const createCategory = categoryRepository.create({ title: category });

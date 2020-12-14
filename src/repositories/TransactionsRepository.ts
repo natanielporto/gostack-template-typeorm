@@ -1,7 +1,6 @@
 import { EntityRepository, Repository } from 'typeorm';
-
 import Transaction from '../models/Transaction';
-import Category from '../models/Category';
+
 
 interface Balance {
   income: number;
@@ -12,23 +11,15 @@ interface Balance {
 @EntityRepository(Transaction)
 class TransactionsRepository extends Repository<Transaction> {
   public async getBalance(): Promise<Balance> {
-    const income = await (await this.find({ where: { type: 'income' } }))
-      .map(el => el.value)
-      .reduce(function (values, value) {
-        return values + value;
-      }, 0);
-    const outcome = await (await this.find({ where: { type: 'outcome' } }))
-      .map(el => el.value)
-      .reduce(function (values, value) {
-        return values + value;
-      }, 0);
+    const { sum: incomeValue } = await this.createQueryBuilder().select('SUM(value)').where({type: 'income',}).getRawOne();
 
-    const total = income - outcome;
+    const { sum: outcomeValue } = await this.createQueryBuilder().select('SUM(value)').where({type: 'outcome',}).getRawOne();
 
-    if (total < 0) {
-      throw Error('Error: negative total.');
-    }
+    const income = parseFloat(incomeValue) || 0.0
+    const outcome = parseFloat(outcomeValue) || 0.0
 
+    const total = income - outcome 
+    
     return { income, outcome, total };
   }
 }
